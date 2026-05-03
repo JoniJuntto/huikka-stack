@@ -1,11 +1,11 @@
 {
-  "extends": "@huikka-stack/config/tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "dist",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "jsx": "react-jsx"
-  }
+	"extends": "@huikka-stack/config/tsconfig.base.json",
+	"compilerOptions": {
+		"composite": true,
+		"outDir": "dist",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"jsx": "react-jsx"
+	}
 }

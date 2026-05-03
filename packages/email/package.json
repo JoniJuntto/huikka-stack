@@ -1,0 +1,28 @@
+{
+	"name": "@huikka-stack/email",
+	"type": "module",
+	"private": true,
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"email": "email dev --dir ./src/emails",
+		"check-types": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@react-email/components": "^1.0.12",
+		"react": "^19.2.5",
+		"react-dom": "^19.2.5",
+		"resend": "^6.12.2"
+	},
+	"devDependencies": {
+		"@huikka-stack/config": "workspace:*",
+		"@types/bun": "catalog:",
+		"@types/react": "^19.2.10",
+		"@types/react-dom": "catalog:",
+		"react-email": "^6.0.5",
+		"typescript": "catalog:"
+	}
+}

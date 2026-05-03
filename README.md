@@ -1,103 +1,136 @@
 # huikka-stack
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Start, Elysia, and more.
+`huikka-stack` is a public full-stack starter built around Bun, TanStack Start, Elysia, Better Auth, Drizzle, PostgreSQL, and a shared UI package.
 
-## Features
+The repo is intentionally structured around one clear contract:
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Start** - SSR framework with TanStack Router
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Elysia** - Type-safe, high-performance framework
-- **Bun** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **Biome** - Linting and formatting
-- **Turborepo** - Optimized monorepo build system
+- `apps/web` owns UI, routing, and TanStack Start server functions.
+- `apps/server` owns external HTTP concerns like Better Auth, liveness, and readiness.
+- `packages/*` contains shared building blocks only.
 
-## Getting Started
+## What this starter includes
 
-First, install the dependencies:
+- Bun workspace + Turborepo monorepo
+- TanStack Start web app
+- Elysia server app
+- Better Auth with environment-aware cookie defaults
+- Drizzle ORM + PostgreSQL
+- Shared UI primitives in `packages/ui`
+- Shared env and DB packages
+- Bun-based tests and GitHub Actions CI
+- A small authenticated notes slice that demonstrates the intended full-stack pattern
+
+## Quickstart
+
+### 1. Install dependencies
 
 ```bash
 bun install
 ```
 
-## Database Setup
+### 2. Start PostgreSQL
 
-This project uses PostgreSQL with Drizzle ORM.
+The starter ships with a local Docker Compose file in `packages/db`.
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+```bash
+bun run db:start
+```
 
-3. Apply the schema to your database:
+### 3. Copy the example environment files
+
+```bash
+cp apps/server/.env.example apps/server/.env
+cp apps/web/.env.example apps/web/.env
+```
+
+The example values already match the default local Docker setup:
+
+- app URL: `http://localhost:3001`
+- server URL: `http://localhost:3000`
+- database URL: `postgresql://postgres:password@localhost:5432/huikka-stack`
+
+### 4. Apply the schema
 
 ```bash
 bun run db:push
 ```
 
-Then, run the development server:
+### 5. Run the starter
 
 ```bash
 bun run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3001](http://localhost:3001) for the web app.
 
-## UI Customization
+## Reference slice
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
+The starter includes one deliberately small authenticated slice in `/dashboard`:
 
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
+- route protection through a shared `requireSession` helper
+- note reads and writes through TanStack Start server functions
+- persistence through Drizzle and the `note` table
 
-### Add more shared components
+It exists to show the intended pattern, not to be a framework. Downstream apps should feel free to delete it once they understand the flow.
 
-Run this from the project root to add more primitives to the shared UI package:
+## Environment contract
+
+### `apps/server/.env`
 
 ```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
+APP_URL=http://localhost:3001
+SERVER_URL=http://localhost:3000
+SERVER_HOST=0.0.0.0
+SERVER_PORT=3000
+BETTER_AUTH_SECRET=change-me-in-production-this-secret-is-dev-only
+DATABASE_URL=postgresql://postgres:password@localhost:5432/huikka-stack
 ```
 
-Import shared components like this:
+### `apps/web/.env`
 
-```tsx
-import { Button } from "@huikka-stack/ui/components/button";
+```bash
+VITE_SERVER_URL=http://localhost:3000
+# VITE_RYBBIT_SITE_ID=your-site-id
+# VITE_RYBBIT_SCRIPT_SRC=https://app.rybbit.io/api/script.js
 ```
 
-### Add app-specific blocks
+## Rybbit analytics
 
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
+The starter supports optional [Rybbit](https://rybbit.com/) analytics through the official tracking script.
 
-## Git Hooks and Formatting
+1. Create a site in your Rybbit dashboard.
+2. Copy the site ID into `apps/web/.env` as `VITE_RYBBIT_SITE_ID`.
+3. Leave `VITE_RYBBIT_SCRIPT_SRC` at `https://app.rybbit.io/api/script.js` for Rybbit Cloud.
+4. If you self-host Rybbit, change `VITE_RYBBIT_SCRIPT_SRC` to your instance script URL instead.
+5. Restart the web app after changing env values.
 
-- Format and lint fix: `bun run check`
+Once enabled, pageviews are tracked automatically in this TanStack Start SPA, including client-side route transitions.
 
-## Project Structure
+Advanced Rybbit setup like custom events, replay privacy tuning, or first-party proxying is intentionally out of scope for this starter baseline.
 
-```
-huikka-stack/
-├── apps/
-│   ├── web/         # Frontend application (React + TanStack Start)
-│   └── server/      # Backend API (Elysia)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
-```
+## Health endpoints
 
-## Available Scripts
+The server app exposes:
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:server`: Start only the server
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:push`: Push schema changes to database
-- `bun run db:generate`: Generate database client/types
-- `bun run db:migrate`: Run database migrations
-- `bun run db:studio`: Open database studio UI
-- `bun run check`: Run Biome formatting and linting
+- `GET /healthz` for liveness
+- `GET /readyz` for dependency readiness
+
+## Scripts
+
+- `bun run dev` starts the monorepo in development mode
+- `bun run build` builds the web and server apps
+- `bun run lint` runs Biome in read-only mode
+- `bun run format` applies Biome fixes
+- `bun run typecheck` runs TypeScript across the workspace
+- `bun run test` runs the Bun test suites
+- `bun run ci` runs lint, typecheck, tests, and builds
+- `bun run db:start` starts PostgreSQL locally
+- `bun run db:push` applies the current Drizzle schema
+
+## Generated files
+
+`apps/web/src/routeTree.gen.ts` is generated by the TanStack router plugin and intentionally ignored. Running the web app or build regenerates it as needed.
+
+## Contributing
+
+See [CONTRIBUTING.md](/Users/jonijuntto/koodaus/huikka-stack/CONTRIBUTING.md).
