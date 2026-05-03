@@ -1,0 +1,3 @@
+{
+  "extends": "@huikka-stack/config/tsconfig.base.json"
+}
