@@ -1,5 +1,5 @@
-import { Toaster } from "@huikka-stack/ui/components/sonner";
 import { env } from "@huikka-stack/env/web";
+import { Toaster } from "@huikka-stack/ui/components/sonner";
 import {
 	createRootRouteWithContext,
 	HeadContent,
